@@ -117,7 +117,7 @@
           'statement': statement,
           'reactionCount': 0
         };
-        socket.emit('retro-submission', submissionData);
+        socket.emit('new-submission', submissionData);
         console.log("submitted", submissionData);
         Object.values(people).forEach(p => {
           p.selected = false;
@@ -202,7 +202,7 @@
         });
       }
 
-      socket.on('broadcast-retro-submission', function(submissionData) {
+      socket.on('broadcast-new-submission', function(submissionData) {
         appendSubmissionDiv(submissionData);
       });
 

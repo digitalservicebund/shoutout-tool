@@ -28,7 +28,7 @@
       let sessionData = [];
 
       let sessionId = getSessionIdFromURL();
-      socket.emit('login-retro-results', sessionId);
+      socket.emit('login-results', sessionId);
       document.getElementById("session-link").href = "/" + sessionId
 
       function buildPerson(person) {
@@ -121,7 +121,7 @@
         console.log("subgroupsSorted", subgroupsSorted);
       }
 
-      socket.on('session-results-login-retro-response', function(session) {
+      socket.on('login-results-response', function(session) {
         console.log("session", session);
         sessionData = session;
         people = session.data.entities;

@@ -27,7 +27,7 @@ dbClient.connect().then(() => {
     }
     submissionsDb.find().toArray().then(submissions => {
       for (let submission of submissions) {
-        activeSessions[submission.sessionId].retroSubmissions.push(submission);
+        activeSessions[submission.sessionId].submissions.push(submission);
       }
       reactionsDb.find().toArray().then(reactions => {
         for (let reaction of reactions) {
@@ -100,7 +100,7 @@ io.on('connection', function(socket) {
       socket.emit('info', 'welcome to session <b>' + sessionId + '</b>'); //, your id is ' + socket.id);
       socket.emit('session-login-response', {
         data: session.data,
-        submissions: session.retroSubmissions,
+        submissions: session.submissions,
         guests: session.guests
       });
     }
@@ -108,12 +108,12 @@ io.on('connection', function(socket) {
       socket.emit('err', 'no session exists with the id <b>' + sessionId + '</b>');
   });
 
-  socket.on('retro-submission', function(submissionData) {
+  socket.on('new-submission', function(submissionData) {
     let session = activeSessions[submissionData.sessionId];
-    submissionData.id = session.retroSubmissions.length;
-    session.handleRetroSubmission(submissionData);
+    submissionData.id = session.submissions.length;
+    session.handleSubmission(submissionData);
     submissionsDb.insertOne(submissionData).then(() => console.log('submission stored in db'));
-    io.emit('broadcast-retro-submission', submissionData);
+    io.emit('broadcast-new-submission', submissionData);
   });
 
   socket.on('add-guest', function(guest) {
@@ -141,13 +141,13 @@ io.on('connection', function(socket) {
     }
   });
 
-  socket.on('login-retro-results', function(sessionId) {
+  socket.on('login-results', function(sessionId) {
     let session = activeSessions[sessionId];
     if (session) {
       socket.emit('info', 'results for session <b>' + sessionId + '</b>'); //, your id is ' + socket.id);
-      socket.emit('session-results-login-retro-response', {
+      socket.emit('login-results-response', {
         data: session.data,
-        submissions: session.retroSubmissions,
+        submissions: session.submissions,
         guests: session.guests
       });
     }

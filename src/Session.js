@@ -1,19 +1,19 @@
 
 const Session = function(sessionData) {
     this.data = sessionData;
-    this.retroSubmissions = [];
+    this.submissions = [];
     this.guests = [];
 };
 
 Session.prototype = {
-    handleRetroSubmission: function(submissionData) {
-        this.retroSubmissions.push(submissionData)
+    handleSubmission: function(submissionData) {
+        this.submissions.push(submissionData)
     },
     addGuest: function(guest) {
       this.guests.push(guest);
     },
     addReactionToSubmission: function(submissionId) {
-        this.retroSubmissions[submissionId].reactionCount ++;
+        this.submissions[submissionId].reactionCount ++;
     },
 };
 
