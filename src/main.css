@@ -1,0 +1,83 @@
+
+@import url("lib/notie.css");
+
+html * {
+    font-family: Arial, serif;
+}
+
+#notie-alert-text a {
+    color: #fff;
+}
+
+.chip {
+    display: inline-block;
+    padding: 0 20px;
+    margin: 4px;
+    height: 40px;
+    line-height: 40px;
+    border-radius: 25px;
+    background-color: lightskyblue;
+}
+
+.add-guest-chip {
+    background-color: white;
+    border: 2px dotted silver;
+    color: gray;
+    height: 35px;
+    line-height: 35px;
+}
+
+.chip-guest {
+    background-color: lightblue;
+}
+
+.chip-selected {
+    -webkit-box-shadow:inset 0 0 0 4px darkblue;
+    -moz-box-shadow:inset 0 0 0 4px darkblue;
+    box-shadow:inset 0 0 0 4px darkblue;
+}
+
+.submission {
+    margin: 0 20px 10px 20px;
+    display: flex;
+    flex-direction: column;
+    min-height: 75px;
+    border-radius: 15px;
+    background-color: #f1f1f1;
+}
+
+.submission_statement {
+    all: initial;
+    font-family: Arial, serif;
+    padding-left: 20px;
+    clear: both;
+    float: left;
+    margin-bottom: 10px;
+}
+
+.submission_names {
+    all: initial;
+    font-family: Arial, serif;
+    color: gray;
+    font-size: 12px;
+    text-transform: uppercase;
+    float: left;
+    padding-left: 20px;
+    padding-top: 10px;
+}
+
+.submission_reaction {
+    all: initial;
+    font-family: Arial, serif;
+    color: gray;
+    float: right;
+    margin-top: 8px;
+    margin-right: 16px;
+    background-color: lightcyan;
+    padding: 3px;
+    border-radius: 8px;
+}
+
+.submission_reaction_nonzero {
+    color: blue;
+}

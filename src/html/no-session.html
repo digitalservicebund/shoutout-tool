@@ -1,0 +1,19 @@
+<!doctype html>
+<html>
+    <head>
+        <title>No session</title>
+        <script src="lib/main.js"></script>
+        <link rel="shortcut icon" href="#">
+        <link rel="stylesheet" type="text/css" href="lib/main.css">
+        <style></style>
+    </head>
+    <body>
+        <div id="info"></div><a id="link" href="#">#</a>    
+        <script>
+            let sessionId = getSessionIdFromURL();
+            document.getElementById('info').innerHTML = 'there is no active session with the id <b>' + sessionId + '</b>';
+            document.getElementById('link').href = '/create?name=' + sessionId;
+            document.getElementById('link').innerHTML = 'create <b>' + sessionId + '</b>-session';
+        </script>
+    </body>
+</html>

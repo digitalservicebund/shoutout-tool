@@ -1,0 +1,248 @@
+<!doctype html>
+<html>
+  <head>
+    <title>Session</title>
+    <script src='/socket.io/socket.io.js'></script>
+    <script src="lib/jquery.js"></script>
+    <script src="lib/main.js"></script>
+    <link rel="shortcut icon" href="#">
+    <link rel="stylesheet" type="text/css" href="lib/main.css">
+    <style>
+      html {
+        padding-top: 40px;
+        text-align: center;
+      }
+    </style>
+  </head>
+  <body>
+    <!--<h1 id="session-info"></h1>
+    <h2 style="color: dimgray">People</h2>-->
+    <small><a href="#" id="results-link" style="color: silver">Go to results</a></small>
+    <br><br>
+    <div id="people-chips">
+      <!--<div id="whole-team-btn" class="chip whole-team-chip">select team</div>-->
+      <div id="add-guest-btn" class="chip add-guest-chip">add person</div>
+    </div>
+    <!--<div id="appreciation" class="chip chip-selected" onclick="statementTypeChipClick(event)">Appreciation</div>
+    <div id="amazing-at" class="chip" onclick="statementTypeChipClick(event)">You'd be amazing at</div>
+    <div id="other" class="chip" onclick="statementTypeChipClick(event)">Other</div>-->
+    <br><br>
+    <input style="height:30px; padding:5px" type="text" id="submission-statement-input" size="100"
+           placeholder="Wertschätzung / Was ihr gemeinsam habt / Ihr wärt super bei / Sonstiges ...">
+    <input style="height:30px; margin-left:5px" id="submit-btn" type="submit" value="Submit">
+    <br><br><br>
+    <div id="submissions"></div>
+    <script src="lib/notie.js"></script>
+    <script>
+      let socket = io();
+
+      let sessionId = getSessionIdFromURL();
+      document.getElementById("results-link").href = "/" + sessionId + "/results";
+      let people;
+      let reactionSpans = {}; // submissionId to <span>
+      let reactionSpansClickedAlready = [];
+      let selectedStatementType = 'appreciation';
+
+      function buildPerson(person) {
+        let div = document.createElement('div');
+        div.className = person.isGuest ? 'chip chip-guest' : 'chip';
+        div.textContent = person.name;
+        document.getElementById('people-chips').insertBefore(div, document.getElementById('add-guest-btn'));
+        person.div = div;
+        div.addEventListener('click', function() {
+          if (person.selected) {
+            div.classList.remove('chip-selected');
+          } else {
+            div.classList.add('chip-selected');
+          }
+          person.selected = !person.selected;
+          // updateWholeTeamButtonStyle();
+        });
+        // div.addEventListener('mouseover', function() {});
+      }
+
+      socket.emit('session-login', sessionId);
+
+      socket.on('session-login-response', function(session) {
+        // document.getElementById('session-info').innerHTML = session.data.name;
+        people = session.data.entities;
+        for (let id of Object.keys(people)) {
+          buildPerson(people[id])
+        }
+        for (let guest of session.guests) {
+          people[guest.id] = guest;
+          buildPerson(guest);
+        }
+        for (let submission of session.submissions) {
+          appendSubmissionDiv(submission);
+          reactionSpans[submission.id].innerHTML = "+" + submission.reactionCount;
+          if (submission.reactionCount > 0)
+            reactionSpans[submission.id].classList.add('submission_reaction_nonzero');
+        }
+      });
+
+      $('#submit-btn').click(function() {
+        submitStatement();
+      });
+
+      $('#submission-statement-input').keypress(function (e) {
+        if (e.which === 13) submitStatement();
+      });
+
+      function sendCommand(command) {
+        socket.emit("command", command);
+      }
+
+      function submitStatement() {
+        let statement = $('#submission-statement-input').val();
+        if (statement.startsWith("$")) {
+          sendCommand(statement.substring(1).trim());
+          $('#submission-statement-input').val("");
+          return;
+        }
+        if (statement.trim().length === 0) {
+          notie.alert({ type: 'error', text: 'No statement entered' })
+          return;
+        }
+        let selectedPeople = Object.values(people).filter(p => p.selected).map(p => p.id);
+        if (selectedPeople.length === 0) {
+          notie.alert({ type: 'error', text: 'No people selected' })
+          return;
+        }
+        let submissionData = {
+          'sessionId': sessionId,
+          'timestamp': getTimestamp(),
+          'selectedPeople': selectedPeople, // this is always sorted ascending
+          'statementType': null,
+          'statement': statement,
+          'reactionCount': 0
+        };
+        socket.emit('retro-submission', submissionData);
+        console.log("submitted", submissionData);
+        Object.values(people).forEach(p => {
+          p.selected = false;
+          p.div.classList.remove('chip-selected');
+        });
+        $('#submission-statement-input').val("");
+        // selectStatementType("appreciation");
+      }
+
+      $('#add-guest-btn').click(function() {
+        let guestName = prompt("What's their name?", "");
+        if (guestName == null || guestName.trim() === "") {
+          notie.alert({ type: 'error', text: 'No name entered' })
+          return;
+        }
+        socket.emit('add-guest', {
+          sessionId: sessionId,
+          id: null,
+          name: guestName,
+          div: null,
+          selected: false,
+          isGuest: true
+        });
+      });
+
+      function wholeTeamIsSelected() {
+        return Object.values(people).filter(p => !p.isGuest).every(p => p.selected) &&
+            Object.values(people).filter(p => p.isGuest).every(p => !p.selected);
+      }
+
+      function updateWholeTeamButtonStyle() {
+        let wholeTeamBtn = document.getElementById('whole-team-btn');
+        if (wholeTeamIsSelected()) {
+          wholeTeamBtn.classList.add('chip-selected');
+        } else {
+          wholeTeamBtn.classList.remove('chip-selected');
+        }
+      }
+
+      $('#whole-team-btn').click(function() {
+        if (wholeTeamIsSelected()) {
+          Object.values(people).forEach(p => {
+            p.selected = false;
+            p.div.classList.remove('chip-selected');
+          });
+        } else {
+          Object.values(people).forEach(p => {
+            if (p.isGuest) {
+              p.selected = false;
+              p.div.classList.remove('chip-selected');
+            } else {
+              p.selected = true;
+              p.div.classList.add('chip-selected');
+            }
+          });
+        }
+        // updateWholeTeamButtonStyle();
+      });
+
+      function appendSubmissionDiv(submissionData) {
+        let names = "";
+        for (id of submissionData.selectedPeople)
+          names += ", " + people[id].name;
+        let submissionDiv = document.createElement("div");
+        submissionDiv.className = "submission";
+        document.getElementById('submissions').prepend(submissionDiv);
+        let submissionHeadlineSpan = createElement('span', submissionDiv, '', '');
+        createElement('span', submissionHeadlineSpan, names.substring(2), 'submission_names');
+        let reactionSpan = createElement('span', submissionHeadlineSpan, '+0', 'submission_reaction');
+        createElement('span', submissionDiv, submissionData.statement, 'submission_statement');
+        reactionSpans[submissionData.id] = reactionSpan;
+        reactionSpan.addEventListener('click', function() {
+          if (reactionSpansClickedAlready.includes(reactionSpan)) {
+            notie.alert({ type: 'error', text: 'Only one reaction per submission' })
+            return;
+          }
+          socket.emit('reaction-added', {
+            sessionId: sessionId,
+            submissionId: submissionData.id
+          });
+          reactionSpansClickedAlready.push(reactionSpan);
+        });
+      }
+
+      socket.on('broadcast-retro-submission', function(submissionData) {
+        appendSubmissionDiv(submissionData);
+      });
+
+      socket.on('broadcast-new-guest', function(guest) {
+        people[guest.id] = guest;
+        buildPerson(guest);
+      });
+
+      socket.on('broadcast-reaction-added', function(reactionData) {
+        let reactionSpan = reactionSpans[reactionData.submissionId];
+        let count = parseInt(reactionSpan.innerHTML.substring(1)) + 1;
+        reactionSpan.innerHTML = "+" + count;
+        if (count === 1)
+          reactionSpan.classList.add('submission_reaction_nonzero');
+      });
+
+      socket.on('disable-session', function() {
+        document.getElementById("results-link").style.display = "block";
+        $('#submit-btn').prop("disabled", true);
+        $('#submission-statement-input').prop("disabled", true);
+      });
+
+      socket.on('enable-session', function() {
+        document.getElementById("results-link").style.display = "none";
+        $('#submit-btn').prop("disabled", false);
+        $('#submission-statement-input').prop("disabled", false);
+      });
+
+      function statementTypeChipClick(event) {
+        selectStatementType(event.target.id);
+      }
+
+      function selectStatementType(statementType) {
+        selectedStatementType = statementType;
+        $('#appreciation').removeClass('chip-selected');
+        $('#amazing-at').removeClass('chip-selected');
+        $('#other').removeClass('chip-selected');
+        $('#' + selectedStatementType).addClass('chip-selected');
+      }
+      setupNotie(notie, socket);
+    </script>
+  </body>
+</html>

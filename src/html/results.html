@@ -1,0 +1,140 @@
+<!doctype html>
+<html>
+  <head>
+    <title>Results</title>
+    <script src='/socket.io/socket.io.js'></script>
+    <script src="lib/main.js"></script>
+    <link rel="shortcut icon" href="#">
+    <link rel="stylesheet" type="text/css" href="lib/main.css">
+    <style>
+      html {
+        padding-top: 40px;
+        text-align: center;
+      }
+    </style>
+  </head>
+  <body>
+    <small><a href="#" id="session-link" style="color: silver">back to session</a></small>
+    <br><br>
+    <div id="people-chips"></div>
+    <br><br>
+    <div id="subgroups"></div>
+    <script src="lib/notie.js"></script>
+    <script>
+      let socket = io();
+
+      let people;
+      let subgroups = {};
+      let sessionData = [];
+
+      let sessionId = getSessionIdFromURL();
+      socket.emit('login-retro-results', sessionId);
+      document.getElementById("session-link").href = "/" + sessionId
+
+      function buildPerson(person) {
+        let div = document.createElement('div');
+        div.className = person.isGuest ? 'chip chip-guest' : 'chip';
+        div.textContent = person.name;
+        document.getElementById('people-chips').append(div);
+        person.div = div;
+        div.addEventListener('click', function() {
+          if (person.selected) {
+            div.classList.remove('chip-selected');
+          } else {
+            div.classList.add('chip-selected');
+          }
+          person.selected = !person.selected;
+          updateSubgroups();
+        });
+      }
+
+      function allSelectedByChipsAreOnSubmission(peopleOnSubmission, peopleSelectedByChips) {
+        for (let i = 0; i < peopleSelectedByChips.length; i++) {
+          if (!peopleOnSubmission.includes(peopleSelectedByChips[i])) {
+            return false;
+          }
+        }
+        return true;
+      }
+
+      function updateSubgroups() {
+        let subgroupsDiv = document.getElementById("subgroups");
+        // reset
+        while (subgroupsDiv.firstChild)
+          subgroupsDiv.removeChild(subgroupsDiv.firstChild);
+        subgroups = {};
+        // (re)build
+        let peopleSelectedByChips = Object.values(people).filter(p => p.selected).map(p => p.id);
+        console.log("peopleSelectedByChips", peopleSelectedByChips);
+
+        for (let submission of Object.values(sessionData.submissions)) {
+          let peopleOnSubmission = submission.selectedPeople;
+
+          if (!allSelectedByChipsAreOnSubmission(peopleOnSubmission, peopleSelectedByChips))
+            continue;
+
+          if (!subgroups[peopleOnSubmission]) {
+            subgroups[peopleOnSubmission] = {
+              indices: peopleOnSubmission,
+              factor: 0,
+              submissions: []
+            };
+          }
+          subgroups[peopleOnSubmission].factor += submission.reactionCount;
+          subgroups[peopleOnSubmission].submissions.push(submission);
+        }
+
+        for (let subgroup of Object.values(subgroups)) {
+          let avgReactionCount = subgroup.factor / subgroup.submissions.length;
+          subgroup.factor = avgReactionCount* subgroup.indices.length * subgroup.submissions.length;
+        }
+
+        let subgroupsSorted = Object.values(subgroups).sort((a, b) => b.factor - a.factor);
+
+        for (let subgroup of subgroupsSorted) {
+          let names = "";
+          for (let id of subgroup.indices)
+            names += ", " + sessionData.data.entities[id].name;
+          let reactionCount = 0;
+          for (let submission of subgroup.submissions)
+            reactionCount += submission.reactionCount;
+          let subgroupDiv = document.createElement("div");
+          subgroupDiv.className = "submission";
+          subgroupsDiv.append(subgroupDiv);
+          let submissionHeadlineSpan = createElement('span', subgroupDiv, '', '');
+          createElement('span', submissionHeadlineSpan, names.substring(2), 'submission_names');
+          createElement('span', submissionHeadlineSpan, reactionCount, 'submission_reaction');
+
+          for (let submission of subgroup.submissions) {
+            let statementDiv = document.createElement('div');
+            statementDiv.className = 'submission_statement';
+            statementDiv.innerHTML = '<span style="color:silver;">&#9679;</span> ' + submission.statement
+            subgroupDiv.appendChild(statementDiv);
+          }
+        }
+
+        let teamMembers = Object.values(sessionData.data.entities).filter(e => !e.isGuest).length;
+        let totalSubgroups = 2 ** teamMembers;
+        let percentageSubgroupsUsed = (subgroupsSorted.length / totalSubgroups) * 100;
+
+        console.log("stats", subgroupsSorted.length, totalSubgroups, percentageSubgroupsUsed + "%");
+        console.log("subgroupsSorted", subgroupsSorted);
+      }
+
+      socket.on('session-results-login-retro-response', function(session) {
+        console.log("session", session);
+        sessionData = session;
+        people = session.data.entities;
+        for (let guest of session.guests)
+          people[guest.id] = guest;
+        for (let id of Object.keys(people))
+          buildPerson(people[id])
+        console.log("people", people);
+
+        updateSubgroups();
+      });
+
+      setupNotie(notie, socket);
+    </script>
+  </body>
+</html>

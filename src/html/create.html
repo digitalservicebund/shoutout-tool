@@ -1,0 +1,64 @@
+<!doctype html>
+<html>
+    <head>
+        <title>Create</title>
+        <script src='/socket.io/socket.io.js'></script>
+        <script src="lib/jquery.js"></script>
+        <script src="lib/main.js"></script>
+        <link rel="shortcut icon" href="#">
+        <link rel="stylesheet" type="text/css" href="lib/main.css">
+        <style></style>
+    </head>
+    <body>
+        <p><strong>create a new session</strong></p><br>
+        name: <input type="text" id="session-name" value="testsession" size="30">
+        <p>set:</p>
+        <textarea id="set-textarea" rows="6" cols="60">Max, Julia, Peter, Barbara, Franz, Claudia</textarea><br>
+        <br><br>
+        <input id="create-session-btn" type="submit" value="create"> 
+        
+        <script src="lib/notie.js"></script>
+        <script>
+            let urlParams = getURLparams(location.search);
+            if (urlParams['name'])
+                $('#session-name').val(urlParams['name']);
+            
+            $('#showOptionsLink').click(function() {
+                $('#showOptionsLink').hide();
+                $('#options').show();
+            });
+
+            let socket = io();
+            
+            $('#create-session-btn').click(function() {
+                let setRaw = $('#set-textarea').val().split(',');
+                let set = [];
+                for (let i = 0; i < setRaw.length; i ++) {
+                    let entity = setRaw[i].trim(); // TODO more cleanups?
+                    if (entity.length > 0)
+                        set.push(entity);
+                }
+
+                let entities = {};
+                for (let i = 0; i < set.length; i ++)
+                  entities[i] = {
+                    id: i,
+                    name: set[i],
+                    div: null,
+                    selected: false,
+                    isGuest: false
+                  };
+                
+                let sessionData = {
+                  'name': $('#session-name').val(),
+                  'timestamp': getTimestamp(),
+                  'entities': entities
+                };
+                
+                socket.emit('create-session', sessionData);
+            });
+            
+            setupNotie(notie, socket);
+        </script>
+    </body>
+</html>
