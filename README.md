@@ -4,6 +4,14 @@ A tool to collect feedback for subgroups of a group.
 
 ## Setup
 
+### config.json
+
+````json
+{
+    "MONGODB_URI": ""
+}
+````
+
 Install and start MongoDB following [these](https://www.mongodb.com/docs/manual/administration/install-community/) instructions.
 ```
 npm install
