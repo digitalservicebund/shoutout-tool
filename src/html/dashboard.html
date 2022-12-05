@@ -26,7 +26,9 @@
         let ul = document.getElementById('sessions');
         for (let sessionId of sessionIds) {
           let li = document.createElement('li');
-          createElement('span', li, sessionId + ', ');
+          let sessionLink = createElement('a', li, sessionId);
+          sessionLink.href = '/' + sessionId;
+          createElement('span', li, ', ');
           let del = createElement('a', li, 'delete', 'a-delete');
           del.href = '#';
           del.onclick = function() {
