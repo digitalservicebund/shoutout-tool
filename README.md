@@ -4,12 +4,18 @@ A tool to collect feedback for subgroups of a group.
 
 ## Setup
 
-### config.json
+#### config.json
 
 ````json
 {
     "MONGODB_URI": ""
 }
+````
+
+#### Connecting to cloud.mongodb.com
+
+````bash
+mongosh "mongodb+srv://<cluster_URL>/db" --apiVersion 1 --username <username>
 ````
 
 Install and start MongoDB following [these](https://www.mongodb.com/docs/manual/administration/install-community/) instructions.
