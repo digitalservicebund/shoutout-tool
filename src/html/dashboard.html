@@ -1,0 +1,46 @@
+<!doctype html>
+<html>
+  <head>
+    <title>Dashboard</title>
+    <script src='/socket.io/socket.io.js'></script>
+    <script src="lib/jquery.js"></script>
+    <script src="lib/main.js"></script>
+    <link rel="shortcut icon" href="#">
+    <link rel="stylesheet" type="text/css" href="lib/main.css">
+    <style>
+      .a-delete {
+        font-size: small;
+      }
+    </style>
+  </head>
+  <body>
+    <h2>Sessions</h2>
+    <ul id="sessions"></ul>
+    <script src="lib/notie.js"></script>
+    <script>
+      let socket = io();
+
+      socket.emit('get-dashboard-data');
+
+      socket.on('receive-dashboard-data', function(sessionIds) {
+        let ul = document.getElementById('sessions');
+        for (let sessionId of sessionIds) {
+          let li = document.createElement('li');
+          createElement('span', li, sessionId + ', ');
+          let del = createElement('a', li, 'delete', 'a-delete');
+          del.href = '#';
+          del.onclick = function() {
+            if (confirm('Really delete?') === true) {
+              socket.emit('delete-session', sessionId);
+              notie.alert({ type: 'info', text: sessionId + ' deleted' })
+              li.remove();
+            }
+          };
+          ul.appendChild(li);
+        }
+      });
+
+      setupNotie(notie, socket);
+    </script>
+  </body>
+</html>

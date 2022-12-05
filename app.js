@@ -60,6 +60,9 @@ app.get('/:var', function(req, res) {
     case 'create':
       res.sendFile(__dirname + '/src/html/create.html');
       break;
+    case 'dashboard':
+      res.sendFile(__dirname + '/src/html/dashboard.html');
+      break;
     default:
       if (activeSessions[utils.formatNameAsId(req.params.var)])
         res.sendFile(__dirname + '/src/html/session.html');
@@ -153,6 +156,15 @@ io.on('connection', function(socket) {
     }
     else
       console.log("no session exists with the id " + sessionId);
+  })
+
+  socket.on('get-dashboard-data', function() {
+    let sessionIds = Object.values(activeSessions).map(session => session.data.id);
+    socket.emit('receive-dashboard-data', sessionIds);
+  })
+
+  socket.on('delete-session', function(sessionId) {
+    // TODO
   })
 
   socket.on('disconnect', function() {
