@@ -7,9 +7,9 @@
     "express": "*",
     "http": "*",
     "jquery": "*",
-    "latinize": "*",
     "mongodb": "*",
     "notie": "*",
+    "slugify": "*",
     "socket.io": "*"
   },
   "scripts": {

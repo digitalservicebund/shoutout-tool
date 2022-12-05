@@ -1,11 +1,11 @@
 const app = require('express')();
 const http = require('http').Server(app);
 const io = require('socket.io')(http);
+const slugify = require('slugify');
 
 const MongoClient = require('mongodb').MongoClient;
 const dbClient = new MongoClient('mongodb://localhost:27017');
 
-const utils = require('./src/utils.js');
 const Session = require('./src/Session.js');
 let activeSessions = {};
 
@@ -64,7 +64,7 @@ app.get('/:var', function(req, res) {
       res.sendFile(__dirname + '/src/html/dashboard.html');
       break;
     default:
-      if (activeSessions[utils.formatNameAsId(req.params.var)])
+      if (activeSessions[slug(req.params.var)])
         res.sendFile(__dirname + '/src/html/session.html');
       else
         res.sendFile(__dirname + '/src/html/no-session.html');
@@ -72,7 +72,7 @@ app.get('/:var', function(req, res) {
 });
 
 app.get('/:var/results', function(req, res) {
-  if (activeSessions[utils.formatNameAsId(req.params.var)])
+  if (activeSessions[slug(req.params.var)])
     res.sendFile(__dirname + '/src/html/results.html');
   else
     res.sendFile(__dirname + '/src/html/no-session.html');
@@ -86,7 +86,7 @@ io.on('connection', function(socket) {
   // console.log('user connected: ' + socket.id);
 
   socket.on('create-session', function(sessionData) {
-    sessionData.id = utils.formatNameAsId(sessionData.name);
+    sessionData.id = slug(sessionData.name);
     if (activeSessions[sessionData.id])
       socket.emit('err', 'a session with the id ' + sessionData.id + ' already exists');
     else {
@@ -171,6 +171,10 @@ io.on('connection', function(socket) {
     // console.log('user disconnected: ' + socket.id);
   });
 });
+
+function slug(string) {
+  return slugify(string, { lower: true });
+}
 
 http.listen(3000, function() {
   console.log('listening on *:3000');
