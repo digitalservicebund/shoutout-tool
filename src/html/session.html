@@ -65,7 +65,7 @@
 
       socket.on('session-login-response', function(session) {
         // document.getElementById('session-info').innerHTML = session.data.name;
-        people = session.data.entities;
+        people = session.data.people;
         for (let id of Object.keys(people)) {
           buildPerson(people[id])
         }

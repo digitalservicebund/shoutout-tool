@@ -34,14 +34,14 @@
                 let setRaw = $('#set-textarea').val().split(',');
                 let set = [];
                 for (let i = 0; i < setRaw.length; i ++) {
-                    let entity = setRaw[i].trim(); // TODO more cleanups?
-                    if (entity.length > 0)
-                        set.push(entity);
+                    let person = setRaw[i].trim();
+                    if (person.length > 0)
+                        set.push(person);
                 }
 
-                let entities = {};
+                let people = {};
                 for (let i = 0; i < set.length; i ++)
-                  entities[i] = {
+                  people[i] = {
                     id: i,
                     name: set[i],
                     div: null,
@@ -50,9 +50,10 @@
                   };
                 
                 let sessionData = {
-                  'name': $('#session-name').val(),
-                  'timestamp': getTimestamp(),
-                  'entities': entities
+                    'id': null,
+                    'name': $('#session-name').val(),
+                    'timestamp': getTimestamp(),
+                    'people': people
                 };
                 
                 socket.emit('create-session', sessionData);

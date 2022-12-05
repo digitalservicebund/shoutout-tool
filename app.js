@@ -121,7 +121,7 @@ io.on('connection', function(socket) {
 
   socket.on('add-guest', function(guest) {
     let session = activeSessions[guest.sessionId];
-    guest.id = Object.keys(session.data.entities).length + session.guests.length;
+    guest.id = Object.keys(session.data.people).length + session.guests.length;
     session.addGuest(guest);
     guestsDb.insertOne(guest).then(() => console.log('guest stored in db'));
     io.emit('broadcast-new-guest', guest);

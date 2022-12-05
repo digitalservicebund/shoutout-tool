@@ -94,7 +94,7 @@
         for (let subgroup of subgroupsSorted) {
           let names = "";
           for (let id of subgroup.indices)
-            names += ", " + sessionData.data.entities[id].name;
+            names += ", " + sessionData.data.people[id].name;
           let reactionCount = 0;
           for (let submission of subgroup.submissions)
             reactionCount += submission.reactionCount;
@@ -113,7 +113,7 @@
           }
         }
 
-        let teamMembers = Object.values(sessionData.data.entities).filter(e => !e.isGuest).length;
+        let teamMembers = Object.values(sessionData.data.people).filter(e => !e.isGuest).length;
         let totalSubgroups = 2 ** teamMembers;
         let percentageSubgroupsUsed = (subgroupsSorted.length / totalSubgroups) * 100;
 
@@ -124,7 +124,7 @@
       socket.on('login-results-response', function(session) {
         console.log("session", session);
         sessionData = session;
-        people = session.data.entities;
+        people = session.data.people;
         for (let guest of session.guests)
           people[guest.id] = guest;
         for (let id of Object.keys(people))
