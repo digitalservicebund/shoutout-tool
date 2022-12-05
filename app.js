@@ -164,7 +164,12 @@ io.on('connection', function(socket) {
   })
 
   socket.on('delete-session', function(sessionId) {
-    // TODO
+    sessionsDb.deleteOne({ id: sessionId });
+    submissionsDb.deleteMany({ sessionId: sessionId });
+    reactionsDb.deleteMany({ sessionId: sessionId });
+    guestsDb.deleteMany({ sessionId: sessionId });
+    delete activeSessions[sessionId];
+    console.log("deleted session and all related data from db: " + sessionId);
   })
 
   socket.on('disconnect', function() {
