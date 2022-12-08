@@ -14,6 +14,11 @@
     "socket.io": "*"
   },
   "scripts": {
-    "start": "node app.js"
+    "start": "node app.js",
+    "lint": "eslint ."
+  },
+  "devDependencies": {
+    "eslint": "^8.29.0",
+    "prettier": "^2.8.1"
   }
 }
