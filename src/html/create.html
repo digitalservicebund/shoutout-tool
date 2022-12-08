@@ -3,7 +3,6 @@
     <head>
         <title>Create</title>
         <script src='/socket.io/socket.io.js'></script>
-        <script src="lib/jquery.js"></script>
         <script src="lib/main.js"></script>
         <link rel="shortcut icon" href="#">
         <link rel="stylesheet" type="text/css" href="lib/main.css">
@@ -21,17 +20,12 @@
         <script>
             let urlParams = getURLparams(location.search);
             if (urlParams['name'])
-                $('#session-name').val(urlParams['name']);
-            
-            $('#showOptionsLink').click(function() {
-                $('#showOptionsLink').hide();
-                $('#options').show();
-            });
+                document.getElementById('session-name').value = urlParams['name'];
 
             let socket = io();
-            
-            $('#create-session-btn').click(function() {
-                let setRaw = $('#set-textarea').val().split(',');
+
+            document.getElementById('create-session-btn').onclick = function() {
+                let setRaw = document.getElementById('set-textarea').value.split(',');
                 let set = [];
                 for (let i = 0; i < setRaw.length; i ++) {
                     let person = setRaw[i].trim();
@@ -51,14 +45,14 @@
                 
                 let sessionData = {
                     'id': null,
-                    'name': $('#session-name').val(),
+                    'name': document.getElementById('session-name').value,
                     'timestamp': getTimestamp(),
                     'people': people
                 };
                 
                 socket.emit('create-session', sessionData);
-            });
-            
+            };
+
             setupNotie(notie, socket);
         </script>
     </body>

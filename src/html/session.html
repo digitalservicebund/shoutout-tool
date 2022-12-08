@@ -3,7 +3,6 @@
   <head>
     <title>Session</title>
     <script src='/socket.io/socket.io.js'></script>
-    <script src="lib/jquery.js"></script>
     <script src="lib/main.js"></script>
     <link rel="shortcut icon" href="#">
     <link rel="stylesheet" type="text/css" href="lib/main.css">
@@ -28,6 +27,7 @@
     <div id="other" class="chip" onclick="statementTypeChipClick(event)">Other</div>-->
     <br><br>
     <input style="height:30px; padding:5px" type="text" id="submission-statement-input" size="100"
+           onkeyup="onSubmissionStatementInputKeyUp(event)"
            placeholder="Wertschätzung / Was ihr gemeinsam habt / Ihr wärt super bei / Sonstiges ...">
     <input style="height:30px; margin-left:5px" id="submit-btn" type="submit" value="Submit">
     <br><br><br>
@@ -81,23 +81,24 @@
         }
       });
 
-      $('#submit-btn').click(function() {
+      document.getElementById("submit-btn").addEventListener('click', function() {
         submitStatement();
       });
 
-      $('#submission-statement-input').keypress(function (e) {
+      function onSubmissionStatementInputKeyUp(e) {
         if (e.which === 13) submitStatement();
-      });
+      }
 
       function sendCommand(command) {
         socket.emit("command", command);
       }
 
       function submitStatement() {
-        let statement = $('#submission-statement-input').val();
+        let statementInput = document.getElementById("submission-statement-input");
+        let statement = statementInput.value;
         if (statement.startsWith("$")) {
           sendCommand(statement.substring(1).trim());
-          $('#submission-statement-input').val("");
+          statementInput.value = "";
           return;
         }
         if (statement.trim().length === 0) {
@@ -118,16 +119,15 @@
           'reactionCount': 0
         };
         socket.emit('new-submission', submissionData);
-        console.log("submitted", submissionData);
         Object.values(people).forEach(p => {
           p.selected = false;
           p.div.classList.remove('chip-selected');
         });
-        $('#submission-statement-input').val("");
+        statementInput.value = "";
         // selectStatementType("appreciation");
       }
 
-      $('#add-guest-btn').click(function() {
+      document.getElementById("add-guest-btn").addEventListener('click', function() {
         let guestName = prompt("What's their name?", "");
         if (guestName == null || guestName.trim() === "") {
           notie.alert({ type: 'error', text: 'No name entered' })
@@ -157,7 +157,7 @@
         }
       }
 
-      $('#whole-team-btn').click(function() {
+      /*document.getElementById("whole-team-btn").addEventListener('click', function() {
         if (wholeTeamIsSelected()) {
           Object.values(people).forEach(p => {
             p.selected = false;
@@ -175,11 +175,11 @@
           });
         }
         // updateWholeTeamButtonStyle();
-      });
+      });*/
 
       function appendSubmissionDiv(submissionData) {
         let names = "";
-        for (id of submissionData.selectedPeople)
+        for (let id of submissionData.selectedPeople)
           names += ", " + people[id].name;
         let submissionDiv = document.createElement("div");
         submissionDiv.className = "submission";
@@ -221,14 +221,14 @@
 
       socket.on('disable-session', function() {
         document.getElementById("results-link").style.display = "block";
-        $('#submit-btn').prop("disabled", true);
-        $('#submission-statement-input').prop("disabled", true);
+        document.getElementById("submit-btn").disabled = true;
+        document.getElementById("submission-statement-input").disabled = true;
       });
 
       socket.on('enable-session', function() {
         document.getElementById("results-link").style.display = "none";
-        $('#submit-btn').prop("disabled", false);
-        $('#submission-statement-input').prop("disabled", false);
+        document.getElementById("submit-btn").disabled = false;
+        document.getElementById("submission-statement-input").disabled = false;
       });
 
       function statementTypeChipClick(event) {
@@ -237,10 +237,10 @@
 
       function selectStatementType(statementType) {
         selectedStatementType = statementType;
-        $('#appreciation').removeClass('chip-selected');
-        $('#amazing-at').removeClass('chip-selected');
-        $('#other').removeClass('chip-selected');
-        $('#' + selectedStatementType).addClass('chip-selected');
+        document.getElementById('appreciation').classList.remove('chip-selected');
+        document.getElementById('amazing-at').classList.remove('chip-selected');
+        document.getElementById('other').classList.remove('chip-selected');
+        document.getElementById(selectedStatementType).classList.add('chip-selected');
       }
       setupNotie(notie, socket);
     </script>
