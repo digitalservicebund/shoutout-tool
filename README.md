@@ -4,13 +4,7 @@ A tool to collect feedback for subgroups of a group.
 
 ## Setup
 
-#### config.json
-
-````json
-{
-    "MONGODB_URI": ""
-}
-````
+Create `config.json` based on `config.example.json` and fill in the required values.
 
 #### Connecting to cloud.mongodb.com
 
