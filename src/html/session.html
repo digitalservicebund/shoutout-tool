@@ -203,15 +203,18 @@
       }
 
       socket.on('broadcast-new-submission', function(submissionData) {
+        if (submissionData.sessionId !== sessionId) return;
         appendSubmissionDiv(submissionData);
       });
 
       socket.on('broadcast-new-guest', function(guest) {
+        if (guest.sessionId !== sessionId) return;
         people[guest.id] = guest;
         buildPerson(guest);
       });
 
       socket.on('broadcast-reaction-added', function(reactionData) {
+        if (reactionData.sessionId !== sessionId) return;
         let reactionSpan = reactionSpans[reactionData.submissionId];
         let count = parseInt(reactionSpan.innerHTML.substring(1)) + 1;
         reactionSpan.innerHTML = "+" + count;
