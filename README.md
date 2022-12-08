@@ -13,9 +13,19 @@ mongosh "mongodb+srv://<cluster_URL>/db" --apiVersion 1 --username <username>
 ````
 
 Install and start MongoDB following [these](https://www.mongodb.com/docs/manual/administration/install-community/) instructions.
-```
+
+### Run locally
+
+```bash
 npm install
 npm start
+```
+
+### Run in Docker
+
+```bash
+docker build -t shoutout-tool .
+docker run -p 3000:3000 --rm -it --env-file .env shoutout-tool
 ```
 
 ## Usage
