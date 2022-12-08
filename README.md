@@ -4,7 +4,7 @@ A tool to collect feedback for subgroups of a group.
 
 ## Setup
 
-Create `config.json` based on `config.example.json` and fill in the required values.
+Create `.env` based on `example.env` and fill in the required values.
 
 #### Connecting to cloud.mongodb.com
 

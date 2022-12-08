@@ -1,14 +1,11 @@
+require('dotenv').config();
 const app = require('express')();
 const http = require('http').Server(app);
 const io = require('socket.io')(http);
 const slugify = require('slugify');
-let config = null;
-try {
-  config = require('./config.json');
-} catch (ignored) {}
 
 const MongoClient = require('mongodb').MongoClient;
-const uri = config && config.MONGODB_URI ? config.MONGODB_URI : "mongodb://localhost:27017";
+const uri = process.env.MONGODB_URI || "mongodb://localhost:27017";
 const dbClient = new MongoClient(uri);
 
 const Session = require('./src/Session.js');
