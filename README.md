@@ -1,4 +1,4 @@
-# :loudspeaker: Shoutout tool :sparkles:
+# :loudspeaker: Shoutout Tool :sparkles:
 
 A tool to collect feedback for subgroups of a group.
 

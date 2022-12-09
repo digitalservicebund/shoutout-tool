@@ -80,23 +80,23 @@ jobs:
           docker tag ${{ env.IMAGE_NAME }}:${{ github.sha }} ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
           docker push --all-tags ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
 
-  # deploy:
-  #   needs: [build-push-image]
-  #   if: github.ref == 'refs/heads/main'
-  #   runs-on: ubuntu-latest
-  #   timeout-minutes: 10
-  #   permissions:
-  #     packages: read
-  #   environment: staging
-  #   steps:
-  #     - name: Deploy new image
-  #       uses: digitalservicebund/github-actions/argocd-deploy@cba5d14610f69a7cc9b0aea25e3c2ed96e5425a1
-  #       with:
-  #         environment: staging
-  #         version: ${{ github.sha }}
-  #         deploying_repo: shoutout-tool
-  #         infra_repo: shoutout-tool-infra
-  #         deploy_key: ${{ secrets.DEPLOY_KEY }}
-  #         app: shoutout-tool-staging
-  #         argocd_pipeline_password: ${{ secrets.ARGOCD_PIPELINE_PASSWORD }}
-  #         argocd_server: ${{ secrets.ARGOCD_SERVER }}
+  deploy:
+    needs: [build-push-image]
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      packages: read
+    environment: staging
+    steps:
+      - name: Deploy new image
+        uses: digitalservicebund/github-actions/argocd-deploy@cba5d14610f69a7cc9b0aea25e3c2ed96e5425a1
+        with:
+          environment: staging
+          version: ${{ github.sha }}
+          deploying_repo: shoutout-tool
+          infra_repo: shoutout-tool-infra
+          deploy_key: ${{ secrets.DEPLOY_KEY }}
+          app: shoutout-tool-staging
+          argocd_pipeline_password: ${{ secrets.ARGOCD_PIPELINE_PASSWORD }}
+          argocd_server: ${{ secrets.ARGOCD_SERVER }}
