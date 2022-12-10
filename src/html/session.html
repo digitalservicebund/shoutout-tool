@@ -23,6 +23,9 @@
       <div id="add-guest-btn" class="chip add-guest-chip">add person</div>
     </div>
     <br><br>
+    <label for="select-sender" style="color: gray">From:</label>
+    <select id="select-sender"><option value="-">-</option></select>
+    &nbsp;
     <label for="select-category" style="color: gray">Category:</label>
     <select id="select-category" onchange="onCategoryChange(this.options[this.selectedIndex].value)"></select>
     <br><br>
@@ -99,6 +102,7 @@
           person.selected = !person.selected;
           // updateWholeTeamButtonStyle();
         });
+        document.getElementById('select-sender').appendChild(new Option(person.name, person.id));
       }
 
       socket.emit('session-login', sessionId);
@@ -159,6 +163,7 @@
         let submissionData = {
           'sessionId': sessionId,
           'timestamp': getTimestamp(),
+          'sender': document.getElementById('select-sender').value,
           'selectedPeople': selectedPeople, // this is always sorted ascending
           'statementType': document.getElementById('select-category').value,
           'statement': statement,

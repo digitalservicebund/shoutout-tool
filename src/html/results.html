@@ -133,13 +133,16 @@
             let category = '';
             if (submission.statementType && submission.statementType !== '-')
               category = ' <small>' + submission.statementType.toUpperCase() + '</small>';
+            let sender = '';
+            if (submission.sender && submission.sender !== '-')
+              sender = '<small style="color:silver;">, from ' + sessionData.data.people[submission.sender].name + '</small>';
             let submissionTime = '';
             if (submission.timestamp) {
               let date = new Date(submission.timestamp * 1000);
               let options = { year: 'numeric', month: 'numeric', day: 'numeric', hour: 'numeric', minute: 'numeric' };
               submissionTime = ' <small style="color:silver;">' + date.toLocaleDateString("de-DE", options) + '</small>';
             }
-            statementDiv.innerHTML = '<span style="color:silver;">&#9679;' + category + '</span> ' + submission.statement + submissionTime;
+            statementDiv.innerHTML = '<span style="color:silver;">&#9679;' + category + '</span> ' + submission.statement + submissionTime + sender;
             subgroupDiv.appendChild(statementDiv);
           }
         }
