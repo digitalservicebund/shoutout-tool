@@ -18,13 +18,19 @@
     <br><br>
     <div id="people-chips"></div>
     <br>
-    <small style="color: gray">
+    <small style="color: darkgray">
+      Show submissions:
       <input type="radio" id="time-all" name="time-filter" value="all" checked>
-      <label for="time-all">Show all</label>
+      <label for="time-all">all</label>
       <input type="radio" id="time-today" name="time-filter" value="only today" checked>
-      <label for="time-today">Only from today</label>
+      <label for="time-today">only from today</label>
+      &nbsp;&nbsp;|&nbsp;&nbsp;<a href="#" id="a-toggle-stats" onclick="toggleStats()" style="color: darkgray">Show subgroup statistics</a>
     </small>
     <!-- filter by category and sender? -->
+    <div id="stats" style="display: none">
+      <br>
+      <span id="stats-total-subgroups"></span>
+    </div>
     <br><br>
     <div id="subgroups"></div>
     <script src="lib/notie.js"></script>
@@ -38,6 +44,25 @@
       let sessionId = getSessionIdFromURL();
       socket.emit('login-results', sessionId);
       document.getElementById("session-link").href = "/" + sessionId
+
+      function computeSubgroupStats() {
+        document.getElementById("stats-total-subgroups").innerHTML =
+          "Total number of possible subgroups with X people: Y";
+        // TODO
+      }
+
+      function toggleStats() {
+        let toggleLink = document.getElementById("a-toggle-stats");
+        let stats = document.getElementById("stats");
+        if (stats.style.display === "none") {
+          computeSubgroupStats();
+          stats.style.display = "block";
+          toggleLink.innerHTML = "Hide subgroup statistics";
+        } else {
+          stats.style.display = "none";
+          toggleLink.innerHTML = "Show subgroup statistics";
+        }
+      }
 
       function buildPerson(person) {
         let div = document.createElement('div');

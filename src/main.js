@@ -21,7 +21,7 @@ function getSessionIdFromURL() {
   if (arr[arr.length - 1].length === 0)
     // to accommodate case of "/" at end of URL
     arr.pop();
-  if (arr[arr.length - 1] === "results") arr.pop();
+  if (arr[arr.length - 1] === "results" || arr[arr.length - 1] === "results#") arr.pop();
   return arr.pop();
 }
 
