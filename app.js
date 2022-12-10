@@ -15,6 +15,7 @@ let sessionsDb;
 let submissionsDb;
 let guestsDb;
 let reactionsDb;
+let categoriesDb;
 
 dbClient.connect().then(() => {
   const db = dbClient.db('db');
@@ -22,6 +23,7 @@ dbClient.connect().then(() => {
   submissionsDb = db.collection('submissions');
   guestsDb = db.collection('guests');
   reactionsDb = db.collection('reactions');
+  categoriesDb = db.collection('categories');
   sessionsDb
     .find()
     .toArray()
@@ -30,6 +32,14 @@ dbClient.connect().then(() => {
         activeSessions[sessionData.id] = new Session(sessionData);
         console.log('imported session ' + sessionData.id + ' from db');
       }
+      categoriesDb
+        .find()
+        .toArray()
+        .then((categories) => {
+          for (let category of categories) {
+            activeSessions[category.sessionId].additionalCategories.push(category);
+          }
+      });
       submissionsDb
         .find()
         .toArray()
@@ -130,6 +140,7 @@ io.on('connection', function (socket) {
         data: session.data,
         submissions: session.submissions,
         guests: session.guests,
+        additionalCategories: session.additionalCategories
       });
     } else socket.emit('err', 'no session exists with the id <b>' + sessionId + '</b>');
   });
@@ -197,8 +208,20 @@ io.on('connection', function (socket) {
     submissionsDb.deleteMany({ sessionId: sessionId });
     reactionsDb.deleteMany({ sessionId: sessionId });
     guestsDb.deleteMany({ sessionId: sessionId });
+    categoriesDb.deleteMany({ sessionId: sessionId });
     delete activeSessions[sessionId];
     console.log('deleted session and all related data from db: ' + sessionId);
+  });
+
+  socket.on('new-category', function (newCategoryData) {
+    let category = {
+      sessionId: newCategoryData.sessionId,
+      id: slug(newCategoryData.label),
+      label: newCategoryData.label,
+    }
+    activeSessions[category.sessionId].additionalCategories.push(category);
+    categoriesDb.insertOne(category).then(() => console.log('category stored in db'));
+    io.emit('broadcast-new-category', category);
   });
 
   socket.on('disconnect', function () {

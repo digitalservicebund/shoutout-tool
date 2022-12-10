@@ -22,13 +22,12 @@
       <!--<div id="whole-team-btn" class="chip whole-team-chip">select team</div>-->
       <div id="add-guest-btn" class="chip add-guest-chip">add person</div>
     </div>
-    <!--<div id="appreciation" class="chip chip-selected" onclick="statementTypeChipClick(event)">Appreciation</div>
-    <div id="amazing-at" class="chip" onclick="statementTypeChipClick(event)">You'd be amazing at</div>
-    <div id="other" class="chip" onclick="statementTypeChipClick(event)">Other</div>-->
+    <br><br>
+    <label for="select-category" style="color: gray">Category:</label>
+    <select id="select-category" onchange="onCategoryChange(this.options[this.selectedIndex].value)"></select>
     <br><br>
     <input style="height:30px; padding:5px" type="text" id="submission-statement-input" size="100"
-           onkeyup="onSubmissionStatementInputKeyUp(event)"
-           placeholder="Wertschätzung / Was ihr gemeinsam habt / Ihr wärt super bei / Sonstiges ...">
+           onkeyup="onSubmissionStatementInputKeyUp(event)">
     <input style="height:30px; margin-left:5px" id="submit-btn" type="submit" value="Submit">
     <br><br><br>
     <div id="submissions"></div>
@@ -36,12 +35,54 @@
     <script>
       let socket = io();
 
+      let categories = [
+        { id: '-', label: '-' },
+        { id: 'appreciation', label: 'Appreciation: you were/are awesome at this' },
+        { id: 'potential', label: "Potential: you'd be amazing at" },
+        { id: 'commonality', label: 'Commonality: you have this in common' },
+        { id: 'other', label: 'Other: something else' }
+      ];
+
+      function buildCategoryOptions() {
+        let select = document.getElementById('select-category');
+        let i, l = select.options.length - 1;
+        for (i = l; i >= 0; i--) select.remove(i); // via https://stackoverflow.com/a/3364546
+        for (let option of categories) select.appendChild(new Option(option.label, option.id));
+        select.appendChild(new Option('+ Add a new category', 'add-new-category'));
+      }
+      buildCategoryOptions();
+
+      function onCategoryChange(selectedOption) {
+        if (selectedOption !== 'add-new-category') {
+          return;
+        }
+        let newCategoryLabel = prompt("What is the new category?", "");
+        if (newCategoryLabel == null || newCategoryLabel.trim() === "") {
+          notie.alert({ type: 'error', text: 'No category entered' })
+          return;
+        }
+        if (categories.find(c => c.id === newCategoryLabel ||  c.label === newCategoryLabel)) {
+          notie.alert({ type: 'error', text: 'Category already exists' })
+          return;
+        }
+        socket.emit('new-category', {
+          sessionId: sessionId,
+          label: newCategoryLabel
+        });
+      }
+
+      socket.on('broadcast-new-category', function(newCategoryData) {
+        console.log('broadcast-new-category', newCategoryData, sessionId);
+        if (newCategoryData.sessionId !== sessionId) return;
+        categories.push(newCategoryData);
+        buildCategoryOptions()
+      })
+
       let sessionId = getSessionIdFromURL();
       document.getElementById("results-link").href = "/" + sessionId + "/results";
       let people;
       let reactionSpans = {}; // submissionId to <span>
       let reactionSpansClickedAlready = [];
-      let selectedStatementType = 'appreciation';
 
       function buildPerson(person) {
         let div = document.createElement('div');
@@ -78,6 +119,12 @@
           if (submission.reactionCount > 0)
             reactionSpans[submission.id].classList.add('submission_reaction_nonzero');
         }
+        if (session.additionalCategories) {
+          for (let category of session.additionalCategories) {
+            categories.push(category);
+          }
+          buildCategoryOptions()
+        }
       });
 
       document.getElementById("submit-btn").addEventListener('click', function() {
@@ -113,7 +160,7 @@
           'sessionId': sessionId,
           'timestamp': getTimestamp(),
           'selectedPeople': selectedPeople, // this is always sorted ascending
-          'statementType': null,
+          'statementType': null, // TODO
           'statement': statement,
           'reactionCount': 0
         };
@@ -123,7 +170,6 @@
           p.div.classList.remove('chip-selected');
         });
         statementInput.value = "";
-        // selectStatementType("appreciation");
       }
 
       document.getElementById("add-guest-btn").addEventListener('click', function() {
@@ -232,18 +278,6 @@
         document.getElementById("submit-btn").disabled = false;
         document.getElementById("submission-statement-input").disabled = false;
       });
-
-      function statementTypeChipClick(event) {
-        selectStatementType(event.target.id);
-      }
-
-      function selectStatementType(statementType) {
-        selectedStatementType = statementType;
-        document.getElementById('appreciation').classList.remove('chip-selected');
-        document.getElementById('amazing-at').classList.remove('chip-selected');
-        document.getElementById('other').classList.remove('chip-selected');
-        document.getElementById(selectedStatementType).classList.add('chip-selected');
-      }
       setupNotie(notie, socket);
     </script>
   </body>
