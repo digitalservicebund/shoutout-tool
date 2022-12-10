@@ -61,11 +61,13 @@
         }
         let newCategoryLabel = prompt("What is the new category?", "");
         if (newCategoryLabel == null || newCategoryLabel.trim() === "") {
-          notie.alert({ type: 'error', text: 'No category entered' })
+          notie.alert({ type: 'error', text: 'No category entered' });
+          document.getElementById('select-category').selectedIndex = 0;
           return;
         }
         if (categories.find(c => c.id === newCategoryLabel ||  c.label === newCategoryLabel)) {
-          notie.alert({ type: 'error', text: 'Category already exists' })
+          notie.alert({ type: 'error', text: 'Category already exists' });
+          document.getElementById('select-category').selectedIndex = 0;
           return;
         }
         socket.emit('new-category', {
