@@ -22,7 +22,7 @@
       Show submissions:
       <input type="radio" id="time-all" name="time-filter" value="all" checked>
       <label for="time-all">all</label>
-      <input type="radio" id="time-today" name="time-filter" value="only today" checked>
+      <input type="radio" id="time-today" name="time-filter" value="only today">
       <label for="time-today">only from today</label>
       &nbsp;&nbsp;|&nbsp;&nbsp;<a href="#" id="a-toggle-stats" onclick="toggleStats()" style="color: darkgray">Show subgroup statistics</a>
     </small>
@@ -39,16 +39,26 @@
 
       let people;
       let subgroups = {};
-      let sessionData = [];
+      let sessionData;
 
       let sessionId = getSessionIdFromURL();
       socket.emit('login-results', sessionId);
       document.getElementById("session-link").href = "/" + sessionId
 
       function computeSubgroupStats() {
+        let teamMembers = Object.values(sessionData.data.people).filter(e => !e.isGuest).length;
+        let totalSubgroups = 2 ** teamMembers;
+        let subgroupsWithoutGuests = Object.values(subgroups).filter(sg => !sg.containsGuests);
+        let percentageSubgroupsUsed = (subgroupsWithoutGuests.length / totalSubgroups) * 100;
+        let guestsExist = sessionData.guests.length > 0;
+
         document.getElementById("stats-total-subgroups").innerHTML =
-          "Total number of possible subgroups with X people: Y";
-        // TODO
+          (guestsExist ? "<small><i>Note that only the core team is considered for these calculations, " +
+            "not people that were added during the session.<br>And all submissions count, " +
+            "independent of a time-filter being active.</i></small><br><br>" : "") +
+          "Total number of possible subgroups with <b>" + teamMembers + "</b> people: <b>" + totalSubgroups
+          + "</b><br><b>" + subgroupsWithoutGuests.length + "</b> out of these <b>" + totalSubgroups +
+          "</b> received a shoutout, that's <b>" + percentageSubgroupsUsed.toFixed(2) + "%</b>";
       }
 
       function toggleStats() {
@@ -125,7 +135,8 @@
             subgroups[peopleOnSubmission] = {
               indices: peopleOnSubmission,
               factor: 0,
-              submissions: []
+              submissions: [],
+              containsGuests: peopleOnSubmission.filter(id => people[id].isGuest).length > 0
             };
           }
           subgroups[peopleOnSubmission].factor += submission.reactionCount;
@@ -172,13 +183,6 @@
             subgroupDiv.appendChild(statementDiv);
           }
         }
-
-        let teamMembers = Object.values(sessionData.data.people).filter(e => !e.isGuest).length;
-        let totalSubgroups = 2 ** teamMembers;
-        let percentageSubgroupsUsed = (subgroupsSorted.length / totalSubgroups) * 100;
-
-        console.log("stats", subgroupsSorted.length, totalSubgroups, percentageSubgroupsUsed + "%");
-        console.log("subgroupsSorted", subgroupsSorted);
       }
 
       socket.on('login-results-response', function(session) {
