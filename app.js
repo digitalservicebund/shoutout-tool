@@ -27,10 +27,7 @@ dbClient.connect().then(() => {
     .toArray()
     .then((sessions) => {
       for (let sessionData of sessions) {
-        activeSessions[sessionData.id] = new Session(
-          sessionData,
-          submissionsDb
-        );
+        activeSessions[sessionData.id] = new Session(sessionData);
         console.log('imported session ' + sessionData.id + ' from db');
       }
       submissionsDb
@@ -111,8 +108,9 @@ io.on('connection', function (socket) {
       );
     else {
       activeSessions[sessionData.id] = new Session(sessionData);
-      sessionsDb.insertOne(sessionData);
-      console.log('created session and stored in db: ' + sessionData.id);
+      sessionsDb.insertOne(sessionData).then(() =>
+        console.log('created session and stored in db: ' + sessionData.id)
+      );
       socket.emit(
         'success',
         'new session has been created: <b><a href="/' +
