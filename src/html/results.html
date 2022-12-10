@@ -108,7 +108,10 @@
           for (let submission of subgroup.submissions) {
             let statementDiv = document.createElement('div');
             statementDiv.className = 'submission_statement';
-            statementDiv.innerHTML = '<span style="color:silver;">&#9679;</span> ' + submission.statement
+            let category = '';
+            if (submission.statementType && submission.statementType !== '-')
+              category = ' <small>' + submission.statementType.toUpperCase() + '</small>';
+            statementDiv.innerHTML = '<span style="color:silver;">&#9679;' + category + '</span> ' + submission.statement
             subgroupDiv.appendChild(statementDiv);
           }
         }

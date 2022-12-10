@@ -160,7 +160,7 @@
           'sessionId': sessionId,
           'timestamp': getTimestamp(),
           'selectedPeople': selectedPeople, // this is always sorted ascending
-          'statementType': null, // TODO
+          'statementType': document.getElementById('select-category').value,
           'statement': statement,
           'reactionCount': 0
         };
