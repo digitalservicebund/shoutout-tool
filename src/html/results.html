@@ -17,6 +17,13 @@
     <small><a href="#" id="session-link" style="color: silver">back to session</a></small>
     <br><br>
     <div id="people-chips"></div>
+    <br>
+    <small style="color: gray">
+      <input type="radio" id="time-all" name="time-filter" value="all" checked>
+      <label for="time-all">Show all</label>
+      <input type="radio" id="time-today" name="time-filter" value="only today" checked>
+      <label for="time-today">Only from today</label>
+    </small>
     <br><br>
     <div id="subgroups"></div>
     <script src="lib/notie.js"></script>
@@ -57,6 +64,14 @@
         return true;
       }
 
+      document.getElementById('time-all').addEventListener('change', function() {
+        updateSubgroups();
+      });
+
+      document.getElementById('time-today').addEventListener('change', function() {
+        updateSubgroups();
+      });
+
       function updateSubgroups() {
         let subgroupsDiv = document.getElementById("subgroups");
         // reset
@@ -67,8 +82,15 @@
         let peopleSelectedByChips = Object.values(people).filter(p => p.selected).map(p => p.id);
         console.log("peopleSelectedByChips", peopleSelectedByChips);
 
+        let pastMidnight = new Date();
+        pastMidnight.setHours(0, 0, 0, 0);
+        let pastMidnightTimestamp = Date.parse(pastMidnight.toString()) / 1000;
+
         for (let submission of Object.values(sessionData.submissions)) {
           let peopleOnSubmission = submission.selectedPeople;
+
+          if (document.getElementById("time-today").checked && submission.timestamp < pastMidnightTimestamp)
+              continue;
 
           if (!allSelectedByChipsAreOnSubmission(peopleOnSubmission, peopleSelectedByChips))
             continue;
