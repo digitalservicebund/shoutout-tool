@@ -176,8 +176,8 @@
         }
 
         for (let subgroup of Object.values(subgroups)) {
-          let avgReactionCount = subgroup.factor / subgroup.submissions.length;
-          subgroup.factor = avgReactionCount* subgroup.indices.length * subgroup.submissions.length;
+          let reactionCountSum = subgroup.factor;
+          subgroup.factor = reactionCountSum + subgroup.indices.length + subgroup.submissions.length;
         }
 
         let subgroupsSorted = Object.values(subgroups).sort((a, b) => b.factor - a.factor);
