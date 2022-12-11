@@ -29,6 +29,7 @@
     <!-- filter by category and sender? -->
     <div id="stats" style="display: none">
       <br>
+      <span id="stats-hint"></span>
       <span id="stats-total-subgroups"></span>
     </div>
     <br><br>
@@ -52,10 +53,11 @@
         let percentageSubgroupsUsed = (subgroupsWithoutGuests.length / totalSubgroups) * 100;
         let guestsExist = sessionData.guests.length > 0;
 
+        document.getElementById("stats-hint").innerHTML = guestsExist ?
+          "<small><i>Note that only the core team is considered for these calculations, " +
+          "not people that were added during the session.</i></small><br><br>" : ""
+
         document.getElementById("stats-total-subgroups").innerHTML =
-          (guestsExist ? "<small><i>Note that only the core team is considered for these calculations, " +
-            "not people that were added during the session.<br>And all submissions count, " +
-            "independent of a time-filter being active.</i></small><br><br>" : "") +
           "Total number of possible subgroups with <b>" + teamMembers + "</b> people: <b>" + totalSubgroups
           + "</b><br><b>" + subgroupsWithoutGuests.length + "</b> out of these <b>" + totalSubgroups +
           "</b> received a shoutout, that's <b>" + percentageSubgroupsUsed.toFixed(2) + "%</b>";
