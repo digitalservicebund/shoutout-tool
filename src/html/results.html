@@ -221,11 +221,10 @@
         }
       }
 
-      function build(session) {
-        console.log("(re)building for session", session);
-        sessionData = session;
-        people = session.data.people;
-        for (let guest of session.guests)
+      function build() {
+        console.log("(re)building for session", sessionData);
+        people = sessionData.data.people;
+        for (let guest of sessionData.guests)
           people[guest.id] = guest;
         clearDiv(document.getElementById('people-chips'));
         for (let id of Object.keys(people))
@@ -233,25 +232,33 @@
         updateSubgroups();
       }
 
+      // real-time updates:
+
       socket.on('login-results-response', function(session) {
-        build(session);
+        sessionData = session;
+        build();
       });
 
       socket.on('broadcast-new-submission', function(submissionData) {
         if (submissionData.sessionId !== sessionId) return;
+        sessionData.submissions[submissionData.id] = submissionData;
+        build();
       });
 
       socket.on('broadcast-new-guest', function(guest) {
         if (guest.sessionId !== sessionId) return;
+        sessionData.guests.push(guest);
+        build();
       });
 
       socket.on('broadcast-reaction-added', function(reactionData) {
         if (reactionData.sessionId !== sessionId) return;
+        sessionData.submissions[reactionData.submissionId].reactionCount ++;
+        build();
       });
 
-      socket.on('broadcast-new-category', function(newCategoryData) {
-        if (newCategoryData.sessionId !== sessionId) return;
-      });
+      // no need to rebuild for a new category, it will show up via the first submission of that category
+      // socket.on('broadcast-new-category', function(newCategoryData) {});
 
       setupNotie(notie, socket);
     </script>
