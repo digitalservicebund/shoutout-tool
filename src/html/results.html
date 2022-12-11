@@ -134,11 +134,16 @@
         updateSubgroups();
       });
 
+      function clearDiv(div) {
+        while (div.firstChild) {
+          div.removeChild(div.lastChild);
+        }
+      }
+
       function updateSubgroups() {
         let subgroupsDiv = document.getElementById("subgroups");
         // reset
-        while (subgroupsDiv.firstChild)
-          subgroupsDiv.removeChild(subgroupsDiv.firstChild);
+        clearDiv(subgroupsDiv);
         subgroups = {};
         // (re)build
         let peopleSelectedByChips = Object.values(people).filter(p => p.selected).map(p => p.id);
@@ -215,17 +220,36 @@
         }
       }
 
-      socket.on('login-results-response', function(session) {
-        console.log("session", session);
+      function build(session) {
+        console.log("(re)building for session", session);
         sessionData = session;
         people = session.data.people;
         for (let guest of session.guests)
           people[guest.id] = guest;
+        clearDiv(document.getElementById('people-chips'));
         for (let id of Object.keys(people))
-          buildPerson(people[id])
-        console.log("people", people);
-
+          buildPerson(people[id]);
         updateSubgroups();
+      }
+
+      socket.on('login-results-response', function(session) {
+        build(session);
+      });
+
+      socket.on('broadcast-new-submission', function(submissionData) {
+        if (submissionData.sessionId !== sessionId) return;
+      });
+
+      socket.on('broadcast-new-guest', function(guest) {
+        if (guest.sessionId !== sessionId) return;
+      });
+
+      socket.on('broadcast-reaction-added', function(reactionData) {
+        if (reactionData.sessionId !== sessionId) return;
+      });
+
+      socket.on('broadcast-new-category', function(newCategoryData) {
+        if (newCategoryData.sessionId !== sessionId) return;
       });
 
       setupNotie(notie, socket);

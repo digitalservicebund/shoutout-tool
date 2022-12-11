@@ -77,11 +77,10 @@
       }
 
       socket.on('broadcast-new-category', function(newCategoryData) {
-        console.log('broadcast-new-category', newCategoryData, sessionId);
         if (newCategoryData.sessionId !== sessionId) return;
         categories.push(newCategoryData);
         buildCategoryOptions()
-      })
+      });
 
       let sessionId = getSessionIdFromURL();
       document.getElementById("results-link").href = "/" + sessionId + "/results";
