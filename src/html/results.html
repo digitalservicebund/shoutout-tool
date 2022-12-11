@@ -76,7 +76,8 @@
           "</b> received a shoutout, that's <b>" + format(percentageSubgroupsUsed) + "%</b>";
 
         document.getElementById("stats-subgroup-quantities").innerHTML = "Subgroups broken down to their different possible sizes<br>" +
-          "<small>size of subgroup: how many received a shoutout / how many could receive a shoutout (percentage of subgroups of that size that received a shoutout)</small><br>";
+          "<small>size of subgroup: how many of that size received at least one shoutout / how many could receive at least one shoutout " +
+          "<br>(percentage of subgroups of that size that received at least one shoutout)</small><br>";
         let subgroupQuantities = getPascalsTriangleRow(teamMembers);
         for (let i = 1; i < subgroupQuantities.length; i++) {
           let quantity = subgroupQuantities[i];
