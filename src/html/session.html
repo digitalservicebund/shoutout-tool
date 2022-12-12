@@ -14,8 +14,8 @@
     </style>
   </head>
   <body>
-    <!--<h1 id="session-info"></h1>
-    <h2 style="color: dimgray">People</h2>-->
+    <h2 id="session-info" style="color: darkblue"></h2>
+    <!--<h2 style="color: dimgray">People</h2>-->
     <small><a href="#" id="results-link" style="color: silver">Go to results</a></small>
     <br><br>
     <div id="people-chips">
@@ -109,7 +109,7 @@
       socket.emit('session-login', sessionId);
 
       socket.on('session-login-response', function(session) {
-        // document.getElementById('session-info').innerHTML = session.data.name;
+        document.getElementById('session-info').innerHTML = session.data.name;
         people = session.data.people;
         for (let id of Object.keys(people)) {
           buildPerson(people[id])

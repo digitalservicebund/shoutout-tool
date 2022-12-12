@@ -14,6 +14,7 @@
     </style>
   </head>
   <body>
+    <h2 id="session-info" style="color: darkblue"></h2>
     <small><a href="#" id="session-link" style="color: silver">back to session</a></small>
     <br><br>
     <div id="people-chips"></div>
@@ -235,6 +236,7 @@
       // real-time updates:
 
       socket.on('login-results-response', function(session) {
+        document.getElementById('session-info').innerHTML = "Results: " + session.data.name;
         sessionData = session;
         build();
       });
