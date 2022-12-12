@@ -17,59 +17,64 @@ let guestsDb;
 let reactionsDb;
 let categoriesDb;
 
-dbClient.connect().then(() => {
-  const db = dbClient.db('db');
-  sessionsDb = db.collection('sessions');
-  submissionsDb = db.collection('submissions');
-  guestsDb = db.collection('guests');
-  reactionsDb = db.collection('reactions');
-  categoriesDb = db.collection('categories');
-  sessionsDb
-    .find()
-    .toArray()
-    .then((sessions) => {
-      for (let sessionData of sessions) {
-        activeSessions[sessionData.id] = new Session(sessionData);
-        console.log('imported session ' + sessionData.id + ' from db');
-      }
-      categoriesDb
-        .find()
-        .toArray()
-        .then((categories) => {
-          for (let category of categories) {
-            activeSessions[category.sessionId].additionalCategories.push(
-              category
-            );
-          }
-        });
-      submissionsDb
-        .find()
-        .toArray()
-        .then((submissions) => {
-          for (let submission of submissions) {
-            activeSessions[submission.sessionId].submissions.push(submission);
-          }
-          reactionsDb
-            .find()
-            .toArray()
-            .then((reactions) => {
-              for (let reaction of reactions) {
-                activeSessions[reaction.sessionId].addReactionToSubmission(
-                  reaction.submissionId
-                );
-              }
-            });
-        });
-      guestsDb
-        .find()
-        .toArray()
-        .then((guests) => {
-          for (let guest of guests) {
-            activeSessions[guest.sessionId].addGuest(guest);
-          }
-        });
-    });
-});
+dbClient
+  .connect()
+  .then(() => {
+    const db = dbClient.db('db');
+    sessionsDb = db.collection('sessions');
+    submissionsDb = db.collection('submissions');
+    guestsDb = db.collection('guests');
+    reactionsDb = db.collection('reactions');
+    categoriesDb = db.collection('categories');
+    sessionsDb
+      .find()
+      .toArray()
+      .then((sessions) => {
+        for (let sessionData of sessions) {
+          activeSessions[sessionData.id] = new Session(sessionData);
+          console.log('imported session ' + sessionData.id + ' from db');
+        }
+        categoriesDb
+          .find()
+          .toArray()
+          .then((categories) => {
+            for (let category of categories) {
+              activeSessions[category.sessionId].additionalCategories.push(
+                category
+              );
+            }
+          });
+        submissionsDb
+          .find()
+          .toArray()
+          .then((submissions) => {
+            for (let submission of submissions) {
+              activeSessions[submission.sessionId].submissions.push(submission);
+            }
+            reactionsDb
+              .find()
+              .toArray()
+              .then((reactions) => {
+                for (let reaction of reactions) {
+                  activeSessions[reaction.sessionId].addReactionToSubmission(
+                    reaction.submissionId
+                  );
+                }
+              });
+          });
+        guestsDb
+          .find()
+          .toArray()
+          .then((guests) => {
+            for (let guest of guests) {
+              activeSessions[guest.sessionId].addGuest(guest);
+            }
+          });
+      });
+  })
+  .catch((err) => {
+    console.log('dbError', err);
+  });
 
 const libs = {
   'jquery.js': '/node_modules/jquery/dist/jquery.min.js',
