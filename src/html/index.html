@@ -1,12 +1,33 @@
 <!doctype html>
 <html>
-    <head>
-        <title>shoutout tool</title>
-        <link rel="shortcut icon" href="#">
-        <link rel="stylesheet" type="text/css" href="lib/main.css">
-        <style></style>
-    </head>
-    <body>
-        create a <b><a href="/create">new session</a></b>
-    </body>
+  <head>
+    <title>Shoutout Tool</title>
+    <script src='/socket.io/socket.io.js'></script>
+    <script src="lib/main.js"></script>
+    <link rel="shortcut icon" href="#">
+    <link rel="stylesheet" type="text/css" href="lib/main.css">
+    <style>
+    </style>
+  </head>
+  <body>
+  <h2>Welcome to the Shoutout Tool</h2>
+  Create a <b><a href="/create">new session</a></b><br><br>
+  <h3>Sessions</h3>
+  <ul id="sessions"></ul>
+  <script>
+    let socket = io();
+
+    socket.emit('get-dashboard-data');
+
+    socket.on('receive-dashboard-data', function(sessionIds) {
+      let ul = document.getElementById('sessions');
+      for (let sessionId of sessionIds) {
+        let li = document.createElement('li');
+        let sessionLink = createElement('a', li, sessionId);
+        sessionLink.href = '/' + sessionId;
+        ul.appendChild(li);
+      }
+    });
+  </script>
+  </body>
 </html>
