@@ -37,9 +37,11 @@ dbClient.connect().then(() => {
         .toArray()
         .then((categories) => {
           for (let category of categories) {
-            activeSessions[category.sessionId].additionalCategories.push(category);
+            activeSessions[category.sessionId].additionalCategories.push(
+              category
+            );
           }
-      });
+        });
       submissionsDb
         .find()
         .toArray()
@@ -81,6 +83,10 @@ app.get('/', function (req, res) {
   res.sendFile(__dirname + '/src/html/index.html');
 });
 
+app.get('/.well-known/healthz', function (req, res) {
+  res.status(200).send('ok');
+});
+
 app.get('/:var', function (req, res) {
   switch (req.params.var) {
     case 'create':
@@ -118,9 +124,11 @@ io.on('connection', function (socket) {
       );
     else {
       activeSessions[sessionData.id] = new Session(sessionData);
-      sessionsDb.insertOne(sessionData).then(() =>
-        console.log('created session and stored in db: ' + sessionData.id)
-      );
+      sessionsDb
+        .insertOne(sessionData)
+        .then(() =>
+          console.log('created session and stored in db: ' + sessionData.id)
+        );
       socket.emit(
         'success',
         'new session has been created: <b><a href="/' +
@@ -140,7 +148,7 @@ io.on('connection', function (socket) {
         data: session.data,
         submissions: session.submissions,
         guests: session.guests,
-        additionalCategories: session.additionalCategories
+        additionalCategories: session.additionalCategories,
       });
     } else socket.emit('err', 'no session exists with the id <b>' + sessionId + '</b>');
   });
@@ -218,9 +226,11 @@ io.on('connection', function (socket) {
       sessionId: newCategoryData.sessionId,
       id: slug(newCategoryData.label),
       label: newCategoryData.label,
-    }
+    };
     activeSessions[category.sessionId].additionalCategories.push(category);
-    categoriesDb.insertOne(category).then(() => console.log('category stored in db'));
+    categoriesDb
+      .insertOne(category)
+      .then(() => console.log('category stored in db'));
     io.emit('broadcast-new-category', category);
   });
 
