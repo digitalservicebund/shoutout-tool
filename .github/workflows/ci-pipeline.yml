@@ -90,7 +90,7 @@ jobs:
     environment: staging
     steps:
       - name: Deploy new image
-        uses: digitalservicebund/github-actions/argocd-deploy@cba5d14610f69a7cc9b0aea25e3c2ed96e5425a1
+        uses: digitalservicebund/github-actions/argocd-deploy@7479179f541d984bc99eb8529cf7f3fc4ce3087d
         with:
           environment: staging
           version: ${{ github.sha }}
