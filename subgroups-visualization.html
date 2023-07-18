@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <title>Subgroups visualization</title>
     <script src="//unpkg.com/force-graph"></script>
+    <script src="//unpkg.com/3d-force-graph"></script>
   </head>
   <body>
     <div id="graph"></div>
@@ -53,8 +54,10 @@
       // console.log(nodes, edges);
 
       let graphDiv = document.getElementById("graph");
-      let graph = ForceGraph()(graphDiv);
-      graph.graphData({ nodes: nodes, links: edges });
+      let graph = ForceGraph3D()(graphDiv);
+      graph
+        .nodeAutoColorBy("name")
+        .graphData({ nodes: nodes, links: edges });
     </script>
   </body>
 </html>
