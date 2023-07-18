@@ -3,8 +3,58 @@
   <head>
     <meta charset="UTF-8">
     <title>Subgroups visualization</title>
+    <script src="//unpkg.com/force-graph"></script>
   </head>
   <body>
-    Test123
+    <div id="graph"></div>
+    <script>
+      let n = 10;
+
+      let people = [];
+      let subgroups = {};
+      let nodes = [];
+      let edges = [];
+
+      for (let i = 0; i < n; i++) {
+        people.push("Person_" + i)
+      }
+
+      for (let i = 0; i < Math.pow(2, n); i++) {
+        let binary = i.toString(2);
+        while (binary.length < n) {
+          binary = "0" + binary;
+        }
+        let subgroup = [];
+        for (let i = 0; i < n; i++) {
+          if (binary[i] === "1") {
+            subgroup.push(people[i]);
+          }
+        }
+        subgroups[binary] = subgroup;
+      }
+
+      for (let key in subgroups) {
+        if (subgroups.hasOwnProperty(key)) {
+          let subgroup = subgroups[key];
+          // nodes
+          for (let i = 0; i < subgroup.length; i++) {
+            let person = subgroup[i];
+            nodes.push({ id: key + "_" + i, name: person });
+          }
+          // edges
+          for (let i = 0; i < subgroup.length; i++) {
+            for (let j = i + 1; j < subgroup.length; j++) {
+              edges.push({ source: key + "_" + i, target: key + "_" + j });
+            }
+          }
+        }
+      }
+
+      // console.log(nodes, edges);
+
+      let graphDiv = document.getElementById("graph");
+      let graph = ForceGraph()(graphDiv);
+      graph.graphData({ nodes: nodes, links: edges });
+    </script>
   </body>
 </html>
