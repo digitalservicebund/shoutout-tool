@@ -12,9 +12,13 @@
       let n = 10;
 
       let people = [];
+      let binaries = [];
       let subgroups = {};
       let nodes = [];
       let edges = [];
+
+      let subgroupCenterNode = false;
+      let connectSubgroupCenters = false;
 
       for (let i = 0; i < n; i++) {
         people.push("Person_" + i)
@@ -32,21 +36,34 @@
           }
         }
         subgroups[binary] = subgroup;
+        binaries.push(binary);
       }
 
-      for (let key in subgroups) {
-        if (subgroups.hasOwnProperty(key)) {
-          let subgroup = subgroups[key];
-          // nodes
+      for (let key of binaries) {
+        let subgroup = subgroups[key];
+        // nodes
+        for (let i = 0; i < subgroup.length; i++) {
+          let person = subgroup[i];
+          nodes.push({ id: key + "_" + i, name: person });
+        }
+        if (subgroupCenterNode) {
+          nodes.push({ id: key, name: "subgroup" });
           for (let i = 0; i < subgroup.length; i++) {
-            let person = subgroup[i];
-            nodes.push({ id: key + "_" + i, name: person });
+            edges.push({ source: key, target: key + "_" + i });
           }
-          // edges
+        } else {
           for (let i = 0; i < subgroup.length; i++) {
             for (let j = i + 1; j < subgroup.length; j++) {
               edges.push({ source: key + "_" + i, target: key + "_" + j });
             }
+          }
+        }
+      }
+
+      if (connectSubgroupCenters) {
+        for (let i = 0; i < binaries.length; i++) {
+          for (let j = i + 1; j < binaries.length; j++) {
+            edges.push({ source: binaries[i], target: binaries[j] });
           }
         }
       }
