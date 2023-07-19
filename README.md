@@ -33,3 +33,7 @@ docker run -p 3000:3000 --rm -it --env-file .env shoutout-tool
 - go to `/create` to create a new session
 - your session is then open at `/<session-id>`
 - results can be viewed at `/<session-id>/results`
+
+# Subgroup visualization
+
+Experimental. Live [here](https://digitalservicebund.github.io/shoutout-tool/subgroups-visualization.html).
